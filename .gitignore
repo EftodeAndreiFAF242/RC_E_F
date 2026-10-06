@@ -1,0 +1,15 @@
+# Build output (see Directory.Build.props); `dotnet build` recreates it
+artifacts/
+bin/
+obj/
+
+# Visual Studio / VS Code per-user files
+.vs/
+.vscode/
+*.user
+*.suo
+
+# Generated test data: ~700 MB, and numbers.txt alone is over GitHub's 100 MB file limit.
+# Recreate it with `Lab1.exe gen` (see Lab1/README.md).
+Lab*/data/numbers.txt
+Lab*/data/parts/

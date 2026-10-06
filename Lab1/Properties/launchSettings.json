@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json.schemastore.org/launchsettings.json",
+  "profiles": {
+    "info": {
+      "commandName": "Project",
+      "commandLineArgs": "info",
+      "workingDirectory": "$(ProjectDir)"
+    },
+    "gen": {
+      "commandName": "Project",
+      "commandLineArgs": "gen",
+      "workingDirectory": "$(ProjectDir)"
+    },
+    "task1a": {
+      "commandName": "Project",
+      "commandLineArgs": "task1a --threads 8",
+      "workingDirectory": "$(ProjectDir)"
+    },
+    "task1b": {
+      "commandName": "Project",
+      "commandLineArgs": "task1b --version all",
+      "workingDirectory": "$(ProjectDir)"
+    },
+    "task1c": {
+      "commandName": "Project",
+      "commandLineArgs": "task1c --workers 8",
+      "workingDirectory": "$(ProjectDir)"
+    },
+    "task2": {
+      "commandName": "Project",
+      "commandLineArgs": "task2 --threads 8",
+      "workingDirectory": "$(ProjectDir)"
+    }
+  }
+}
