@@ -9,6 +9,10 @@ obj/
 *.user
 *.suo
 
+# Java class files (javac recreates them) and the report generator's downloaded packages (npm install)
+Lab*/java/out/
+node_modules/
+
 # Generated test data: ~700 MB, and numbers.txt alone is over GitHub's 100 MB file limit.
 # Recreate it with `Lab1.exe gen` (see Lab1/README.md).
 Lab*/data/numbers.txt

@@ -63,8 +63,11 @@ Usage:  Lab1 <command> [--option value ...]
   task1c   --workers N   [--batch 10000] [--capacity 100]   (--capacity 0 = unlimited)
            1 reader thread + N worker threads connected by a bounded blocking queue.
 
-  task2    --threads N   [--dir data/parts]
+  task2    --threads N   [--dir data/parts] [--cache on|off] [--label text]
            Each file is read with ONE read into a byte buffer, parsed and counted.
+           Also prints how long the threads waited for the disk (I/O) and parsed (CPU).
+           --cache off reads straight from the device, bypassing the Windows file cache.
+           --label only names the run in the output/CSV (run_task2.ps1 uses cold / warm).
 
   info     Print CPU / OS / .NET information for the report.
 

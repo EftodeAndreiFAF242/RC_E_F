@@ -1,0 +1,5 @@
+lang,task,variant,threads,time_ms,peak_memory_mb,negative,positive,zero,total,check,io_ms,cpu_ms
+csharp,task2,cold,1,30268.5,71.0,25007776,24992202,22,50000000,CORRECT,29941.3,323.4
+csharp,task2,warm,1,347.5,71.2,25007776,24992202,22,50000000,CORRECT,52.8,291.0
+csharp,task2,cold,2,29951.3,115.5,25007776,24992202,22,50000000,CORRECT,55846.6,310.2
+csharp,task2,warm,2,186.2,115.2,25007776,24992202,22,50000000,CORRECT,72.4,290.8

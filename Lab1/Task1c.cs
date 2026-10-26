@@ -35,16 +35,21 @@ public static class Task1c
 
         var perWorker = new SignCounts[workerCount];
 
+        // Filled in by the reader: the most batches that were ever waiting in the queue.
+        // Almost always 0-2 -> the workers are faster than the reader (they wait for it).
+        // Always the capacity (100) -> the reader is faster (it waits for the workers).
+        int queueMax = 0;
+
         var stopwatch = Stopwatch.StartNew();
 
         // The producer: one extra thread, created and started by hand.
-        var reader = new Thread(() => ReadBatches(path, batchSize, queue));
+        var reader = new Thread(() => queueMax = ReadBatches(path, batchSize, queue));
         reader.Start();
 
         // The consumers: RunAll creates the workers and waits until all have finished.
         ThreadRunner.RunAll(workerCount, w => perWorker[w] = CountBatches(queue));
 
-        reader.Join();
+        reader.Join();   // after Join we may safely read queueMax, which the reader thread wrote
         stopwatch.Stop();
 
         var total = new SignCounts();
@@ -52,12 +57,16 @@ public static class Task1c
             total += part;
 
         string variant = $"b{batchSize}-q{(capacity > 0 ? capacity.ToString() : "inf")}";
-        Report.Print("task1c", variant, workerCount, stopwatch.Elapsed, total, cli);
+        Report.Print("task1c", variant, workerCount, stopwatch.Elapsed, total, cli, queueMax: queueMax);
     }
 
-    /// <summary>The producer: reads lines and pushes them into the queue in batches.</summary>
-    private static void ReadBatches(string path, int batchSize, BlockingCollection<List<string>> queue)
+    /// <summary>
+    /// The producer: reads lines and pushes them into the queue in batches.
+    /// Returns the largest number of batches that were waiting in the queue at any moment.
+    /// </summary>
+    private static int ReadBatches(string path, int batchSize, BlockingCollection<List<string>> queue)
     {
+        int queueMax = 0;
         try
         {
             // StreamReader turns the file's bytes into text, line by line.
@@ -72,12 +81,14 @@ public static class Task1c
                 if (batch.Count == batchSize)
                 {
                     queue.Add(batch);                      // BLOCKS here while the queue is full
+                    queueMax = Math.Max(queueMax, queue.Count);   // how full is it right now?
                     batch = new List<string>(batchSize);   // a NEW list: the old one now belongs to a worker
                 }
             }
 
             if (batch.Count > 0)
                 queue.Add(batch);                          // the last, incomplete batch
+            return queueMax;
         }
         finally
         {

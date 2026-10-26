@@ -1,0 +1,5 @@
+lang,task,variant,threads,time_ms,peak_memory_mb,negative,positive,zero,total,check,io_ms,cpu_ms
+csharp,task2,cold,4,29878.4,203.3,25007776,24992202,22,50000000,CORRECT,96827.6,316.7
+csharp,task2,warm,4,116.4,203.5,25007776,24992202,22,50000000,CORRECT,119.6,324.2
+java,task2,cold,1,30456.4,96.0,25007776,24992202,22,50000000,CORRECT,29968.7,476.9
+java,task2,warm,1,499.8,101.2,25007776,24992202,22,50000000,CORRECT,48.0,441.3

@@ -1,0 +1,13 @@
+{
+  "name": "lab1-report",
+  "private": true,
+  "description": "Builds the Lab 1 Word report (charts + text) from the CSV files in ../results",
+  "type": "module",
+  "scripts": {
+    "build": "node build_report.mjs"
+  },
+  "dependencies": {
+    "@resvg/resvg-js": "^2.6.2",
+    "docx": "^9.5.1"
+  }
+}

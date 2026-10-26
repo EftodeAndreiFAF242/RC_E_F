@@ -27,6 +27,10 @@
          ("tiered compilation"). Turning that off makes every method fully optimised from
          the start, so our time measurements are not disturbed by the compiler warming up. -->
     <TieredCompilation>false</TieredCompilation>
+
+    <!-- The Lab1 folder also holds the Java version (java\) and the report generator (report\).
+         They are not part of this C# program, so Visual Studio should not list or build them. -->
+    <DefaultItemExcludes>$(DefaultItemExcludes);java\**;report\**;results\**</DefaultItemExcludes>
   </PropertyGroup>
 
 </Project>
