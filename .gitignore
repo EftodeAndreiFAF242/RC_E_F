@@ -17,3 +17,6 @@ node_modules/
 # Recreate it with `Lab1.exe gen` (see Lab1/README.md).
 Lab*/data/numbers.txt
 Lab*/data/parts/
+
+# Word creates ~$*.docx lock files while a document is open
+~$*
