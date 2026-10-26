@@ -371,8 +371,8 @@ while the program runs.
 
 ## 7. Code walkthrough
 
-The code files themselves have comments on almost every line (including C# syntax explanations). Here is the big picture
-of each file and the parts you must be able to explain.
+The code itself has only short comments, one sentence where something important happens. The full explanations are here:
+the big picture of each file and the parts you must be able to explain.
 
 ### 7.1 `Program.cs` and `CommandLine.cs`
 

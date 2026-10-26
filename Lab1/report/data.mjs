@@ -1,7 +1,4 @@
-// =============================================================================
-//  Reads every results/*.csv written by the C# and Java programs and turns the
-//  rows into the numbers the report needs (medians of repeated runs).
-// =============================================================================
+// Reads every results/*.csv written by the C# and Java programs and reduces repeated runs to their median.
 import fs from 'node:fs';
 import path from 'node:path';
 

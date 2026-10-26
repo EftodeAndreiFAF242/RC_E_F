@@ -5,16 +5,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
 
-/**
- * Task 1b: three ways to count (same as Task1b.cs).
- *   1. shared counters without synchronisation  -> WRONG (lost updates)
- *   2. shared counters protected by a lock      -> correct but slow
- *   3. a private counter per thread, summed at the end -> correct and fast
- */
+/** Task 1b: shared counters without synchronisation, shared counters with synchronized, and per-thread counters. */
 final class Task1b {
     private Task1b() { }
 
-    /** Versions 1 and 2 share ONE object of this class between all threads. */
     private static final class SharedCounters {
         long negative;
         long positive;
@@ -29,10 +23,8 @@ final class Task1b {
         }
     }
 
-    // In Java ANY object can be used as a lock with the `synchronized` keyword (C#: `lock`).
-    private static final Object GATE = new Object();
+    private static final Object GATE = new Object();   // in Java any object can be used as a lock
 
-    /** A function that counts the numbers and returns the totals (C#: Func<SignCounts>). */
     @FunctionalInterface
     private interface Counter {
         SignCounts count() throws Exception;
@@ -46,7 +38,7 @@ final class Task1b {
 
         System.out.println("Loading all numbers into an int array (not measured)...");
         int[] numbers = loadNumbers(path);
-        System.gc();   // ask the garbage collector to clean up the 50 million temporary Strings now
+        System.gc();
 
         System.out.printf("Counting %,d numbers with %d threads.%n", numbers.length, threadCount);
 
@@ -71,11 +63,7 @@ final class Task1b {
         Report.print("task1b", name, threads, elapsed, result, cli);
     }
 
-    // ------------------------------------------------------------------------------
-    // Version 1: shared counters, NO synchronisation (a race condition on purpose).
-    // shared.negative++ is read -> add 1 -> write; two threads can read the same old value
-    // and both write old+1, so one increment is LOST.
-    // ------------------------------------------------------------------------------
+    // Version 1, a race on purpose: counter++ is read-add-write, so two threads can write the same value and lose a count.
     private static SignCounts countUnsynchronized(int[] numbers, int threadCount) throws Exception {
         SharedCounters shared = new SharedCounters();
 
@@ -92,10 +80,7 @@ final class Task1b {
         return shared.toSignCounts();
     }
 
-    // ------------------------------------------------------------------------------
-    // Version 2: shared counters protected by a lock.
-    // Only one thread at a time may be inside `synchronized (GATE) { ... }`.
-    // ------------------------------------------------------------------------------
+    // Version 2: correct, but all threads fight for the same lock 50 million times.
     private static SignCounts countWithLock(int[] numbers, int threadCount) throws Exception {
         SharedCounters shared = new SharedCounters();
 
@@ -114,18 +99,16 @@ final class Task1b {
         return shared.toSignCounts();
     }
 
-    // ------------------------------------------------------------------------------
-    // Version 3: a separate counter for each thread, added together at the end.
-    // ------------------------------------------------------------------------------
+    // Version 3: every thread counts into its own object, and the results are added once after join.
     private static SignCounts countPerThread(int[] numbers, int threadCount) throws Exception {
         SignCounts[] perThread = new SignCounts[threadCount];
 
         ThreadRunner.runAll(threadCount, t -> {
             long[] range = ThreadRunner.split(numbers.length, t, threadCount);
-            SignCounts local = new SignCounts();   // only THIS thread ever sees `local`
+            SignCounts local = new SignCounts();
             for (int i = (int) range[0]; i < (int) range[1]; i++)
                 local.add(numbers[i]);
-            perThread[t] = local;                  // shared memory is touched once, at the end
+            perThread[t] = local;
         });
 
         SignCounts total = new SignCounts();
@@ -134,10 +117,8 @@ final class Task1b {
         return total;
     }
 
-    /** Reads numbers.txt line by line into an int[] (simple and slow; not measured). */
+    // A plain int[] (4 bytes per number) instead of List<Integer>, which would need one object per number.
     private static int[] loadNumbers(Path path) throws Exception {
-        // Java has no List<int> (generics work only with objects, so it would be List<Integer>,
-        // one object per number = ~16 bytes each). A plain int[] that we grow ourselves is 4 bytes each.
         int[] numbers = new int[50_000_000];
         int count = 0;
         try (BufferedReader reader = Files.newBufferedReader(path)) {

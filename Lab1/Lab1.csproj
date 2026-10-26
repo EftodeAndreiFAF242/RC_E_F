@@ -1,35 +1,18 @@
-<!--
-  The project file: tells the .NET SDK how to build this program.
-  `dotnet build` / `dotnet run` read this file.
--->
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <!-- Exe = a console application (as opposed to a library, "Library"). -->
     <OutputType>Exe</OutputType>
-
-    <!-- Which .NET version we build for: .NET 10 (the current long-term-support release). -->
     <TargetFramework>net10.0</TargetFramework>
-
-    <!-- Automatically adds common `using` lines (System, System.IO, System.Threading, ...)
-         to every file, so we don't have to write them ourselves. -->
     <ImplicitUsings>enable</ImplicitUsings>
-
-    <!-- The compiler warns us when a variable might be null. `string?` means "may be null",
-         `string` means "never null". -->
     <Nullable>enable</Nullable>
 
-    <!-- Numbers are always written/read as "-1234" with '.' as decimal point, whatever the
-         Windows language settings are. Important: our data file must look the same everywhere. -->
+    <!-- Numbers are always written as "-1234" with '.' as decimal point, whatever the Windows language is. -->
     <InvariantGlobalization>true</InvariantGlobalization>
 
-    <!-- .NET normally compiles code quickly first and re-optimises "hot" code later
-         ("tiered compilation"). Turning that off makes every method fully optimised from
-         the start, so our time measurements are not disturbed by the compiler warming up. -->
+    <!-- Every method is fully optimised from its first call, so JIT warm-up does not distort the timings. -->
     <TieredCompilation>false</TieredCompilation>
 
-    <!-- The Lab1 folder also holds the Java version (java\) and the report generator (report\).
-         They are not part of this C# program, so Visual Studio should not list or build them. -->
+    <!-- The Java version, the report generator and the results live here too but are not part of the C# build. -->
     <DefaultItemExcludes>$(DefaultItemExcludes);java\**;report\**;results\**</DefaultItemExcludes>
   </PropertyGroup>
 

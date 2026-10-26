@@ -1,8 +1,4 @@
-// =============================================================================
-//  Small helpers on top of the "docx" library, so the report text can be written
-//  as plain strings:  **bold**, *italic* and `code` inside a paragraph are
-//  turned into the matching Word formatting.
-// =============================================================================
+// Helpers on top of the "docx" library that turn **bold**, *italic* and `code` in plain strings into Word formatting.
 import {
     AlignmentType, BorderStyle, ImageRun, LevelFormat, Paragraph, ShadingType, Table, TableCell,
     TableRow, TextRun, WidthType, HeadingLevel, ExternalHyperlink,

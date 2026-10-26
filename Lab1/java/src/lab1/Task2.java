@@ -12,16 +12,8 @@ import java.util.List;
 import java.util.Locale;
 
 /**
- * Task 2: many files on slow storage (same design as Task2.cs).
- * A FILE is the unit of work; one thread reads it with ONE read call into ONE byte buffer,
- * parses it and counts its numbers. Each thread measures its I/O time (open + read) and its
- * CPU time (parse), so we can see which one dominates.
- *
- * Java detail: the buffer is a DIRECT ByteBuffer (ByteBuffer.allocateDirect). Its memory is
- * outside the Java heap, so the operating system can read the file straight into it. If we
- * used a normal byte[] instead, Java would read into a hidden temporary native buffer first
- * and then copy into the array: twice the memory for the same file.
- * (The C# version's  --cache off  option is not implemented here.)
+ * Task 2: each thread reads its share of the 8 files, every file with one read into a reused direct ByteBuffer
+ * (the OS reads straight into it), and measures its I/O time and its parsing time.
  */
 final class Task2 {
     private Task2() { }
@@ -35,7 +27,6 @@ final class Task2 {
         if (!Files.isDirectory(dir))
             throw new IllegalArgumentException("Folder '" + dir + "' not found.");
 
-        // Find numbers_*.txt and sort them so the order is always the same.
         List<Path> files = new ArrayList<>();
         try (DirectoryStream<Path> stream = Files.newDirectoryStream(dir, "numbers_*.txt")) {
             for (Path p : stream) files.add(p);
@@ -58,7 +49,6 @@ final class Task2 {
             int from = (int) range[0], to = (int) range[1];
             SignCounts local = new SignCounts();
 
-            // One buffer per thread, sized for its largest file, reused for each of its files.
             long largest = 0;
             for (int i = from; i < to; i++)
                 largest = Math.max(largest, Files.size(files.get(i)));
@@ -70,8 +60,7 @@ final class Task2 {
                 try (FileChannel file = FileChannel.open(files.get(i), StandardOpenOption.READ)) {
                     int length = (int) file.size();
                     buffer.clear().limit(length);
-                    // ONE read call for the whole file (the loop is only a safety net, like in C#).
-                    while (buffer.hasRemaining())
+                    while (buffer.hasRemaining())   // one read call; the loop is only a safety net
                         if (file.read(buffer, buffer.position()) < 0) break;
                     filled = buffer.position();
                 }

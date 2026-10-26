@@ -1,12 +1,4 @@
-// =============================================================================
-//  Draws the report's charts as SVG (a text format for vector pictures) and turns
-//  them into PNG images with resvg. No chart library: each chart is a few dozen
-//  SVG elements, so every pixel is under our control.
-//
-//  Look: thin 2px lines, 8px dots with a white ring, solid hairline grid,
-//  C# = blue, Java = orange (checked for colour-blind safety), text in gray/black,
-//  never in the series colour. Layout: title, subtitle, legend row, then the plot.
-// =============================================================================
+// Draws the report's charts as SVG and converts them to PNG (C# blue, Java orange: a pair checked for colour-blind safety).
 import { Resvg } from '@resvg/resvg-js';
 
 export const COLORS = {

@@ -6,15 +6,11 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 
-/**
- * Task 1a: counting with threads. Same algorithm as Task1a.cs:
- * the file is cut into N equal BYTE ranges, one per thread; a line belongs to the thread whose
- * range contains the line's FIRST byte (see Task1a.cs for the full boundary explanation).
- */
+/** Task 1a: the file is cut into N byte ranges and a line belongs to the thread whose range holds its first byte. */
 final class Task1a {
     private Task1a() { }
 
-    private static final int CHUNK_SIZE = 1 << 20;   // each thread reads 1 MB at a time
+    private static final int CHUNK_SIZE = 1 << 20;
 
     static void run(CommandLine cli) throws Exception {
         Path path = Path.of(cli.getString("--file", Paths.NUMBERS));
@@ -22,13 +18,13 @@ final class Task1a {
         Paths.requireFile(path);
 
         long fileSize = Files.size(path);
-        SignCounts[] perThread = new SignCounts[threadCount];   // one result slot per thread
+        SignCounts[] perThread = new SignCounts[threadCount];
 
-        long start = System.nanoTime();   // Java's high-precision timer (C#: Stopwatch)
+        long start = System.nanoTime();
 
         ThreadRunner.runAll(threadCount, t -> {
             long[] range = ThreadRunner.split(fileSize, t, threadCount);
-            perThread[t] = countRange(path, range[0], range[1]);   // each thread writes only its own slot
+            perThread[t] = countRange(path, range[0], range[1]);
         });
 
         long elapsed = System.nanoTime() - start;
@@ -40,45 +36,42 @@ final class Task1a {
         Report.print("task1a", "-", threadCount, elapsed, total, cli);
     }
 
-    /** Counts the numbers on every line whose first byte lies in [start, end). */
     private static SignCounts countRange(Path path, long start, long end) throws Exception {
         SignCounts counts = new SignCounts();
         NumberParser parser = new NumberParser();
-        byte[] buffer = new byte[CHUNK_SIZE];        // this thread's private buffer
-        ByteBuffer wrapper = ByteBuffer.wrap(buffer); // a ByteBuffer "view" of the array, for FileChannel
+        byte[] buffer = new byte[CHUNK_SIZE];
+        ByteBuffer wrapper = ByteBuffer.wrap(buffer);
 
-        // Every thread opens its OWN channel to the file; try-with-resources closes it.
         try (FileChannel file = FileChannel.open(path, StandardOpenOption.READ)) {
-            long position = start > 0 ? start - 1 : 0;   // one byte early, to see the byte before `start`
-            boolean skipping = start > 0;                // true while skipping the previous thread's line
+            // Start one byte early: if that byte is not '\n', the first line belongs to the previous thread and is skipped.
+            long position = start > 0 ? start - 1 : 0;
+            boolean skipping = start > 0;
 
             while (true) {
                 long remaining = end - position;
                 int toRead = remaining > 0 ? (int) Math.min(CHUNK_SIZE, remaining) : 64;
 
                 wrapper.clear().limit(toRead);
-                // read(buffer, position) = read at an EXPLICIT file offset (C#: RandomAccess.Read).
-                // It does not use or move a shared "current position" of the channel.
-                int bytesRead = file.read(wrapper, position);
+                int bytesRead = file.read(wrapper, position);   // a read at an explicit offset, like RandomAccess.Read
 
-                if (bytesRead <= 0) {                    // -1 = end of the file
-                    parser.finishLine(counts);           // the last line may have no '\n'
+                if (bytesRead <= 0) {
+                    parser.finishLine(counts);
                     return counts;
                 }
 
                 for (int i = 0; i < bytesRead; i++) {
                     byte b = buffer[i];
-                    long bytePosition = position + i;    // where this byte is in the whole file
+                    long bytePosition = position + i;
 
                     if (skipping) {
                         if (b == '\n') {
                             skipping = false;
-                            if (bytePosition + 1 >= end) return counts;   // no line starts in our range
+                            if (bytePosition + 1 >= end) return counts;
                         }
                         continue;
                     }
 
-                    // A line just ended; if the NEXT line starts at or after `end`, it isn't ours: stop.
+                    // A line just ended; if the next one starts at or after `end`, it belongs to the next thread.
                     if (parser.feed(b, counts) && bytePosition + 1 >= end)
                         return counts;
                 }

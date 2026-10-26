@@ -1,19 +1,4 @@
-<!--
-  Shared build settings for ALL labs in RC_E_F (Lab1, Lab2, ...).
-
-  How it works: when you build any project (e.g. Lab1\Lab1.csproj), .NET looks in the
-  project's folder and then in every parent folder for a file named "Directory.Build.props"
-  and automatically applies it. So this one file affects every lab below it.
-
-  What it does: puts ALL build output (the compiled .exe/.dll and temporary files) in
-      RC_E_F\artifacts\bin\<LabName>\release\   (the program you run)
-      RC_E_F\artifacts\obj\<LabName>\           (temporary compiler files)
-  instead of creating "bin" and "obj" folders inside each lab folder.
-  The "artifacts" folder can be deleted at any time; `dotnet build` recreates it.
-
-  Each lab's .csproj keeps all the settings it needs to build, so a lab folder handed in
-  on its own still builds (its output then simply goes to bin/obj next to it).
--->
+<!-- Applies to every lab below this folder: build output goes to RC_E_F\artifacts instead of bin/obj inside each lab. -->
 <Project>
   <PropertyGroup>
     <UseArtifactsOutput>true</UseArtifactsOutput>

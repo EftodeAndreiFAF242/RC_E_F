@@ -10,42 +10,32 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
 /**
- * Task 1c: producer and consumers (same design as Task1c.cs).
- *
- *     [reader] --batches of 10,000 lines--> [ queue, max 100 batches ] --> [worker 1], [worker 2], ...
- *
- * C# vs Java: C#'s BlockingCollection can be "closed" (CompleteAdding). Java's BlockingQueue
- * cannot, so the reader closes it with a "poison pill": after the last batch it puts one
- * special END marker per worker. A worker that takes END knows nothing more is coming and stops.
- * Because the queue is first-in-first-out, every END comes after all the real batches.
+ * Task 1c: a reader thread fills a bounded blocking queue with batches and N workers count them; Java's queue
+ * cannot be closed, so the reader ends with one END "poison pill" per worker.
  */
 final class Task1c {
     private Task1c() { }
 
-    // The poison pill. Workers compare with == (the SAME object), not with equals(),
-    // so a real empty batch could never be mistaken for it.
+    // Compared with == (the same object), so a real empty batch can never be mistaken for it.
     private static final List<String> END = new ArrayList<>();
 
     static void run(CommandLine cli) throws Exception {
         Path path = Path.of(cli.getString("--file", Paths.NUMBERS));
         int workerCount = cli.getInt("--workers", Runtime.getRuntime().availableProcessors());
         int batchSize = cli.getInt("--batch", 10_000);
-        int capacity = cli.getInt("--capacity", 100);   // 0 = no size limit (question 6)
+        int capacity = cli.getInt("--capacity", 100);   // 0 = no size limit
         Paths.requireFile(path);
 
-        // ArrayBlockingQueue = a fixed-size blocking queue (put() waits while it is full).
-        // LinkedBlockingQueue without a size = a queue with no limit (put() never waits).
         BlockingQueue<List<String>> queue = capacity > 0
                 ? new ArrayBlockingQueue<>(capacity)
                 : new LinkedBlockingQueue<>();
 
         SignCounts[] perWorker = new SignCounts[workerCount];
-        Exception[] readerError = { null };   // a one-element array: lambdas can't assign local variables
-        int[] queueMax = { 0 };               // the most batches ever waiting in the queue (set by the reader)
+        Exception[] readerError = { null };   // one-element arrays, because a lambda cannot assign local variables
+        int[] queueMax = { 0 };
 
         long start = System.nanoTime();
 
-        // The producer: one extra thread, created and started by hand.
         Thread reader = new Thread(() -> {
             try {
                 queueMax[0] = readBatches(path, batchSize, workerCount, queue);
@@ -55,7 +45,6 @@ final class Task1c {
         });
         reader.start();
 
-        // The consumers: runAll creates the workers and waits until all have finished.
         ThreadRunner.runAll(workerCount, w -> perWorker[w] = countBatches(queue));
 
         reader.join();
@@ -70,10 +59,6 @@ final class Task1c {
         Report.print("task1c", variant, workerCount, elapsed, total, cli, null, null, queueMax[0]);
     }
 
-    /**
-     * The producer: reads lines and puts them into the queue in batches, then one END per worker.
-     * Returns the largest number of batches that were waiting in the queue at any moment.
-     */
     private static int readBatches(Path path, int batchSize, int workerCount,
                                    BlockingQueue<List<String>> queue) throws Exception {
         int queueMax = 0;
@@ -83,26 +68,24 @@ final class Task1c {
             while ((line = file.readLine()) != null) {
                 batch.add(line);
                 if (batch.size() == batchSize) {
-                    queue.put(batch);                    // BLOCKS here while the queue is full
-                    queueMax = Math.max(queueMax, queue.size());   // how full is it right now?
-                    batch = new ArrayList<>(batchSize);  // a NEW list: the old one now belongs to a worker
+                    queue.put(batch);                               // blocks while the queue is full
+                    queueMax = Math.max(queueMax, queue.size());
+                    batch = new ArrayList<>(batchSize);             // the old list now belongs to a worker
                 }
             }
             if (!batch.isEmpty())
-                queue.put(batch);                        // the last, incomplete batch
+                queue.put(batch);
             return queueMax;
         } finally {
-            // "Close" the queue: even if reading failed, the workers must be told to stop.
-            for (int i = 0; i < workerCount; i++)
+            for (int i = 0; i < workerCount; i++)   // in finally, so the workers stop even if reading failed
                 queue.put(END);
         }
     }
 
-    /** A consumer: takes batches until it receives END. */
     private static SignCounts countBatches(BlockingQueue<List<String>> queue) throws Exception {
-        SignCounts local = new SignCounts();   // private to this worker
+        SignCounts local = new SignCounts();
         while (true) {
-            List<String> batch = queue.take();  // WAITS here while the queue is empty
+            List<String> batch = queue.take();   // waits while the queue is empty
             if (batch == END) return local;
             for (String line : batch)
                 local.add(Integer.parseInt(line));

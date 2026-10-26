@@ -1,13 +1,4 @@
-// =============================================================================
-//  Builds the Word report for Lab 1 from the measurements in ../results.
-//
-//      cd Lab1\report
-//      npm install          (once: downloads "docx" and "@resvg/resvg-js")
-//      node build_report.mjs
-//
-//  Output: Lab1_Report_Eftode_Andrei_FAF-242.docx and charts\*.png in this folder,
-//  plus ..\results\summary.md (the median tables, used in the README).
-// =============================================================================
+// Builds the Word report, its charts and results/summary.md from every CSV in ../results (npm install, then node build_report.mjs).
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';

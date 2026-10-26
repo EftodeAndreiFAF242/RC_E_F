@@ -8,21 +8,16 @@ import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.Locale;
 
-/** Prints the result of one run, checks it, and optionally appends it to a CSV file (same as Report.cs). */
+/** Prints one result with the process's peak memory, checks the totals and optionally appends a CSV row. */
 final class Report {
     private Report() { }
 
-    /** Task 1a/1b: no extra measurements. */
     static void print(String task, String variant, int threads, long elapsedNanos,
                       SignCounts counts, CommandLine cli) throws IOException {
         print(task, variant, threads, elapsedNanos, counts, cli, null, null, null);
     }
 
-    /**
-     * Java has no optional parameters, so the short version above calls this one ("overloading").
-     * ioMs / cpuMs (Task 2) are `Double` and queueMax (Task 1c) is `Integer`: with a capital
-     * letter they are objects, so they may be null ("not measured"), unlike `double` / `int`.
-     */
+    // Java has no optional parameters, so the extra measurements are nullable objects (Double, Integer).
     static void print(String task, String variant, int threads, long elapsedNanos, SignCounts counts,
                       CommandLine cli, Double ioMs, Double cpuMs, Integer queueMax) throws IOException {
         double timeMs = elapsedNanos / 1_000_000.0;
@@ -41,7 +36,6 @@ final class Report {
             appendCsv(Path.of(csvPath), task, variant, threads, timeMs, peakMb, counts, status, ioMs, cpuMs, queueMax);
     }
 
-    /** Compares with data/numbers.expected.txt. Returns CORRECT, WRONG or UNCHECKED. */
     private static String check(SignCounts counts, String[] details) throws IOException {
         Path expectedFile = Path.of(Paths.EXPECTED);
         if (!Files.exists(expectedFile)) {
@@ -66,7 +60,6 @@ final class Report {
         if (folder != null) Files.createDirectories(folder);
         boolean isNewFile = !Files.exists(path);
 
-        // try-with-resources = C#'s `using`: the file is closed at the end of the block.
         try (PrintWriter out = new PrintWriter(Files.newBufferedWriter(path, StandardCharsets.UTF_8,
                 StandardOpenOption.CREATE, StandardOpenOption.APPEND))) {
             if (isNewFile)

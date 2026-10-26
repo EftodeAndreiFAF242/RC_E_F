@@ -1,19 +1,4 @@
-# =============================================================================
-#  Runs every Task 1 configuration (1a, 1b, 1c) and saves all results to a CSV
-#  file in the results folder.
-#
-#  Usage (from the Lab1 folder, in PowerShell):
-#      powershell -ExecutionPolicy Bypass -File .\run_task1.ps1                 # C#, 5 runs each
-#      powershell -ExecutionPolicy Bypass -File .\run_task1.ps1 -Lang both      # C# and Java
-#      powershell -ExecutionPolicy Bypass -File .\run_task1.ps1 -Runs 3 -Extras
-#
-#  -Runs N  : how many times to repeat every configuration. A single run of ~50 ms is
-#             noisy, so the report uses the MEDIAN of the N runs (the middle value).
-#  -Lang    : csharp, java or both
-#  -Extras  : also run the experiments for question 6 of Task 1c:
-#             batches of a single line, and a queue with no size limit.
-#  -Tasks   : which parts to run (default all three), e.g.  -Tasks 1c
-# =============================================================================
+# Runs every Task 1 configuration -Runs times in C# and/or Java and saves the results to results\task1_<time>.csv.
 param(
     [int]$Runs = 5,
     [ValidateSet('csharp', 'java', 'both')][string]$Lang = 'csharp',
@@ -22,7 +7,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-Set-Location $PSScriptRoot                       # always work from the Lab1 folder
+Set-Location $PSScriptRoot
 . "$PSScriptRoot\common.ps1"
 
 Initialize-Lab1 -Lang $Lang
@@ -33,7 +18,6 @@ $csv = "results\task1_{0}.csv" -f (Get-Date -Format 'yyyyMMdd_HHmmss')
 $threadCounts = 1, 2, 4, 8, 16, 32, 64
 
 foreach ($language in Get-Languages $Lang) {
-    # Helper: run one configuration of the current language and append its row to the CSV.
     function Run([string[]]$arguments) { Invoke-Lab1 -Lang $language -Arguments ($arguments + '--csv', $csv) }
 
     Write-Host "`n##### $language #####"
@@ -59,6 +43,7 @@ foreach ($language in Get-Languages $Lang) {
         }
     }
 
+    # Question 6 of Task 1c: batches of a single line, and a queue with no size limit.
     if ($Extras -and '1c' -in $Tasks) {
         Write-Host "`n=== Task 1c, question 6: batches of ONE line (expect it to be much slower) ==="
         foreach ($w in 1, 4) { Run 'task1c', '--workers', "$w", '--batch', '1' }

@@ -3,28 +3,13 @@ package lab1;
 import java.io.FileNotFoundException;
 import java.nio.file.NoSuchFileException;
 
-/**
- * Lab 1 - Concurrency in practice, JAVA version (the bonus task).
- *
- * It has the same commands and options as the C# program, reads the same data files
- * (created by the C# "gen" command) and writes the same CSV format with lang = "java",
- * so the two languages can be compared directly.
- *
- * Build and run from the Lab1 folder:
- *     javac -d java/out -encoding UTF-8 java/src/lab1/*.java
- *     java --enable-native-access=ALL-UNNAMED -cp java/out lab1.Main task1a --threads 8
- *
- * C# vs Java at a glance:
- *   C#  : the entry point can be "top-level statements" (no class needed).
- *   Java: every method lives in a class; the program starts at  public static void main(String[] args).
- */
+/** Java version of Lab 1 (the bonus): same commands, options, data files and CSV format as the C# program. */
 public final class Main {
 
     public static void main(String[] args) throws Exception {
         try {
             CommandLine cli = new CommandLine(args);
 
-            // A "switch expression" with arrows (Java 14+): no `break` needed, no fall-through.
             switch (cli.command()) {
                 case "task1a" -> Task1a.run(cli);
                 case "task1b" -> Task1b.run(cli);
@@ -34,11 +19,10 @@ public final class Main {
                 default       -> printHelp();
             }
         }
-        // Like the C# version: only errors caused by bad input are turned into a short message.
-        // (NumberFormatException, thrown by Integer.parseInt, is a kind of IllegalArgumentException.)
+        // Only errors caused by bad input become a short message, like in the C# version.
         catch (IllegalArgumentException | FileNotFoundException | NoSuchFileException e) {
             System.err.println("Error: " + e.getMessage());
-            System.exit(1);   // non-zero exit code = "something went wrong" for scripts
+            System.exit(1);
         }
     }
 
@@ -52,7 +36,6 @@ public final class Main {
     }
 
     private static void printHelp() {
-        // """ ... """ is a "text block" (Java 15+): a string that spans several lines.
         System.out.println("""
             Lab 1 - Concurrency in practice (Java version)
 

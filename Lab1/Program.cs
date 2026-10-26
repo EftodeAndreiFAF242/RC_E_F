@@ -1,26 +1,10 @@
-// =============================================================================
-//  Lab 1 - Concurrency in practice
-//  Entry point: looks at the first word on the command line and runs that task.
-//
-//  Examples (from the Lab1 folder):
-//      dotnet run -c Release -- gen                    generate the data files
-//      dotnet run -c Release -- task1a --threads 8     Task 1a with 8 threads
-//  Everything after `--` is passed to OUR program instead of to `dotnet`.
-// =============================================================================
-
-// This file uses "top-level statements": modern C# lets you write code directly in
-// Program.cs, without `class Program { static void Main(string[] args) { ... } }`.
-// The compiler generates that Main method for us, and `args` (the words typed after
-// the program name) is available automatically.
-
-using Lab1;   // our own classes live in the namespace "Lab1" (see the other files)
+// Lab 1 - Concurrency in practice: runs the task named by the first command-line word (gen, task1a, ...).
+using Lab1;
 
 try
 {
-    // `var` = "let the compiler figure out the type". Here the type is CommandLine.
     var cli = new CommandLine(args);
 
-    // `switch` picks one branch depending on the value of cli.Command.
     switch (cli.Command)
     {
         case "gen":    DataGenerator.Run(cli); break;
@@ -32,19 +16,16 @@ try
         default:       PrintHelp();            break;
     }
 }
-// `catch ... when (...)` only catches the errors we expect from bad input;
-// real bugs still crash loudly with a full stack trace, which helps debugging.
+// Only errors caused by bad input become a short message; real bugs still crash with a full stack trace.
 catch (Exception ex) when (ex is ArgumentException or FileNotFoundException
                                or DirectoryNotFoundException or FormatException)
 {
     Console.Error.WriteLine($"Error: {ex.Message}");
-    Environment.ExitCode = 1;   // non-zero exit code = "something went wrong" for scripts
+    Environment.ExitCode = 1;
 }
 
-// A "local function": a helper declared inside the top-level code.
 static void PrintHelp()
 {
-    // @"..." is a verbatim string: it can span several lines and '\' is not special.
     Console.WriteLine(@"Lab 1 - Concurrency in practice
 
 Usage:  Lab1 <command> [--option value ...]

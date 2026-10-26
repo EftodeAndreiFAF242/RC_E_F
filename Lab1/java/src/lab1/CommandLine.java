@@ -4,14 +4,8 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
-/**
- * A very small command-line reader (same rules as CommandLine.cs).
- * Example:  task1a --threads 8 --csv results.csv
- *   command() = "task1a",  options = { "--threads" -> "8", "--csv" -> "results.csv" }
- */
-final class CommandLine {   // no `public`: visible only inside the package lab1
-
-    // `final` on a field = it is assigned once (like `readonly` in C#).
+/** Splits "command --name value ..." into the command word and a map of options. */
+final class CommandLine {
     private final Map<String, String> options = new HashMap<>();
     private final String command;
 
@@ -34,7 +28,6 @@ final class CommandLine {   // no `public`: visible only inside the package lab1
         return options.getOrDefault(name, defaultValue);
     }
 
-    /** Returns null when the option was not given (Java has no `string?`; any reference may be null). */
     String getOptionalString(String name) {
         return options.get(name);
     }
