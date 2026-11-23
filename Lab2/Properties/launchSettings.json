@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json.schemastore.org/launchsettings.json",
+  "profiles": {
+    "server": {
+      "commandName": "Project",
+      "commandLineArgs": "server 5050",
+      "workingDirectory": "$(ProjectDir)"
+    },
+    "client": {
+      "commandName": "Project",
+      "commandLineArgs": "client 127.0.0.1 5050",
+      "workingDirectory": "$(ProjectDir)"
+    },
+    "provider": {
+      "commandName": "Project",
+      "commandLineArgs": "provider 127.0.0.1 5050",
+      "workingDirectory": "$(ProjectDir)"
+    },
+    "demo": {
+      "commandName": "Project",
+      "commandLineArgs": "demo 127.0.0.1 5050",
+      "workingDirectory": "$(ProjectDir)"
+    }
+  }
+}
